@@ -12,7 +12,7 @@ export const useAuth = () => {
 
 const AuthProvider = ({children}) => { 
     const [user, setUser] = useState(null);
-
+    
     const signup = async (values) => {
         try {
             //const user = await registerReq(values);

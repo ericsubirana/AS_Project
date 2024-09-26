@@ -25,7 +25,7 @@ function Home() {
                 </div>
             ) : (
                 <div>
-                    YOU NEED TO REGISTER IN ORDER TO GET INTO ANY CLASS
+                    <p>YOU NEED TO REGISTER IN ORDER TO GET INTO ANY CLASS</p>
                 </div>
             )}
         </>

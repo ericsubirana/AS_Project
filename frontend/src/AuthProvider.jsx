@@ -14,26 +14,113 @@ export const useAuth = () => {
 const AuthProvider = ({children}) => { 
     const [user, setUser] = useState(null);
     const [admin, setAdmin] = useState(null);
-    const [token, setToken] = useState(null);
 
     useEffect( () => {
-        const userToken = Cookies.get('authToken');
-        setToken(userToken);
-        console.log(token)
+        const checkLogin = async () => {
+            const userToken = Cookies.get('authToken');
+            if(!userToken){
+                setUser(null)
+                setAdmin(null)
+            }
+            try{
+                const response = await fetch('http://localhost:5000/verifyToken', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json', 
+                    },
+                    body: JSON.stringify(userToken),
+                });
+                if(!response.data)
+                {
+                    setUser(null)
+                    setAdmin(null)
+                }
+                setUser(data)
+                setAdmin(data.admin)
+            }
+            catch{
+                console.log('error tete')
+            }
+    
+        }
+
+        checkLogin();
     }, [])
 
     const signup = async (values) => {
+
         try {
-            //const user = await registerReq(values);
-            setUser(values);
+            const response = await fetch('http://localhost:5000/signup', {
+                method: 'POST', 
+                headers: {
+                    'Content-Type': 'application/json', 
+                },
+                body: JSON.stringify(values),
+            });
+    
+            if (!response.ok) {
+                throw new Error('Error in network request');
+            }
+            
+            const data = await response.json(); // Parse the JSON response
+            setUser(data)
+            setAdmin(data.admin)
+            console.log('Server response:', data);
+           
         } catch (error) {
+            console.error('Error during signup:', error);
             setErrorContext("error.response.data");
         }
     }
+
+    const login = async (values) => {
+        try {
+            const response = await fetch('http://localhost:5000', {
+                method: 'POST', 
+                headers: {
+                    'Content-Type': 'application/json', 
+                },
+                body: JSON.stringify(values),
+            });
+    
+            if (!response.ok) {
+                throw new Error('Error in network request');
+            }
+    
+            const data = await response.json(); // Parse the JSON response
+            setUser(data)
+            setAdmin(data.admin)
+            console.log('Server response:', data);
+           
+        } catch (error) {
+            console.error('Error during signup:', error);
+            setErrorContext("error.response.data");
+        }
+    }
+
+    const logout = async () => {
+
+        try {
+            const response = await fetch('http://localhost:5000/logout');
+    
+            if (!response.ok) {
+                throw new Error('Error in network request');
+            }
+            setUser(null)
+            setAdmin(null)
+           
+        } catch (error) {
+            console.error('Error during signup:', error);
+            setErrorContext("error.response.data");
+        }
+    }
+
     return(
         <AuthContext.Provider value={{
             user,
-            signup
+            signup,
+            login,
+            logout
         }}>
             {children}
         </AuthContext.Provider>

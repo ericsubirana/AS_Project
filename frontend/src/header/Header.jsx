@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 
 const Header = () => {
    
-    const {user, signup} = useAuth();
+    const {user, signup, logout} = useAuth();
     const navigation = useNavigate();
 
     return (
@@ -21,7 +21,7 @@ const Header = () => {
                         <h1>LANGUAGES ACADEMY</h1>
                     </div>
                     <div className="lore">
-                            <button className="button-6" onClick={() => signup(null)}>LOGOUT</button>
+                            <button className="button-6" onClick={() => logout()}>LOGOUT</button>
                     </div>
                 </div>
             ) : (

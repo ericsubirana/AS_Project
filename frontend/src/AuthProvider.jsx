@@ -17,29 +17,26 @@ const AuthProvider = ({children}) => {
 
     useEffect( () => {
         const checkLogin = async () => {
-            const userToken = Cookies.get('authToken');
-            if(!userToken){
-                setUser(null)
-                setAdmin(null)
-            }
             try{
-                const response = await fetch('http://localhost:5000/verifyToken', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json', 
-                    },
-                    body: JSON.stringify(userToken),
-                });
+                const response = await fetch('http://localhost:5000/verifyToken',
+                    {
+                        method: 'GET',
+                        credentials: 'include'
+                    }
+                );
+                const data = await response.json();
+
                 if(!response.data)
                 {
                     setUser(null)
                     setAdmin(null)
                 }
-                setUser(data)
+        
+                setUser(data.username)
                 setAdmin(data.admin)
             }
             catch{
-                console.log('error tete')
+                console.log('error')
             }
     
         }
@@ -55,21 +52,22 @@ const AuthProvider = ({children}) => {
                 headers: {
                     'Content-Type': 'application/json', 
                 },
+                credentials: 'include',
                 body: JSON.stringify(values),
             });
     
             if (!response.ok) {
-                throw new Error('Error in network request');
+                return 1;
             }
             
             const data = await response.json(); // Parse the JSON response
+            console.log(data)
             setUser(data)
             setAdmin(data.admin)
-            console.log('Server response:', data);
+            return 0;
            
         } catch (error) {
-            console.error('Error during signup:', error);
-            setErrorContext("error.response.data");
+            return 2;
         }
     }
 
@@ -80,6 +78,7 @@ const AuthProvider = ({children}) => {
                 headers: {
                     'Content-Type': 'application/json', 
                 },
+                credentials: 'include',
                 body: JSON.stringify(values),
             });
     
@@ -106,6 +105,7 @@ const AuthProvider = ({children}) => {
             if (!response.ok) {
                 throw new Error('Error in network request');
             }
+            
             setUser(null)
             setAdmin(null)
            

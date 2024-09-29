@@ -32,7 +32,12 @@ const Login = () => {
                 password: x
             };
     
-            login(values)
+            login(values).then(() => {
+                toast.success("Logged successfully!");
+                setTimeout(() => {
+                    navigation("/home");
+                }, 2000); // Optional: adds delay to show the success message
+            })
         });
     }
 

@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { useAuth } from "../../AuthProvider";
+import { useLocation } from 'react-router-dom';
 
 import Header from "../../header/Header";
 import Body from "../../body/Body"
@@ -7,10 +8,7 @@ import Body from "../../body/Body"
 function Home() {
 
     const { signup, user, admin } = useAuth();
-
-    useEffect ( () => {
-        console.log('epa')
-    }, [])
+    const location = useLocation();
 
     return (
         <>

@@ -30,7 +30,13 @@ const Register = () => {
                 password: x
             };
     
-            signup(values)
+            signup(values).then((x) => {
+                if (x == 0) {
+                    window.location.href = '/home';
+                } else {
+                    toast.error('Email already exists');
+                }
+            });            
         });
     }
 
@@ -41,7 +47,7 @@ const Register = () => {
                 <ToastContainer position='top-center' />
                 <form name='form-login' onSubmit={registerUser}>
                     <span className="fontawesome-lock"></span>
-                    <input type="text" id="mail" name="mail" placeholder="Email" required pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.(org|net|com)$"/>
+                    <input type="text" id="mail" name="mail" placeholder="Email" required/>
                     <span className="fontawesome-user"></span>
                     <input type="text" id="user" name="user" placeholder="Username" required/>
                     <span className="fontawesome-lock"></span>

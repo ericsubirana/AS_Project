@@ -7,10 +7,6 @@ function Body() {
 
     const { signup, user, admin } = useAuth();
 
-    useEffect ( () => {
-        console.log('epa')
-    }, [])
-
     return (
         <>
             {user?.length > 0 ? (

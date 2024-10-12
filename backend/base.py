@@ -78,7 +78,6 @@ def register_user():
                 "admin": False
             }
         })
-        
         response.set_cookie('token', token)
 
         return response
@@ -88,7 +87,22 @@ def register_user():
             "status": "error",
             "message": "Email already exists"
         }), 400
-    
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    data = request.get_json()
+    email = data['email']
+    password = data['password']
+    user = mongo.db.users.find_one({'email': email})
+    print(user)
+    if not user:
+         return jsonify({
+            "status": "error",
+            "message": "Incorrect password"
+        }), 400
+    token = jwt.encode({"user_id": str(user['_id'])}, "secret_key", algorithm="HS256")
+    return jsonify({"success": True, "token": token})
+
 @app.route("/logout")
 def logout():
     response = make_response("Cookie removed")

@@ -123,7 +123,23 @@ def login():
 
     return response
 
-
+@app.route('/takeStudents', methods=['GET'])
+def students():
+    students_cursor = mongo.db.users.find({'admin': False})
+    students = list(students_cursor) 
+    emails = [student.get('email') for student in students] 
+    if students:  
+        response = jsonify({
+            "status": "success",
+            "message": "Users retrieved successfully",
+            "emails": emails 
+        })
+        return response
+    else:
+        return jsonify({
+            "status": "error",
+            "message": "No users found"
+        }), 400
 # Run the application
 if __name__ == '__main__':
     app.run(debug=True)

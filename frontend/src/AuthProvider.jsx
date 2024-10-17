@@ -25,14 +25,13 @@ const AuthProvider = ({children}) => {
                     }
                 );
                 const data = await response.json();
-                console.log(data)
-
+                
                 if(!response.data)
                 {
                     setUser(null)
                     setAdmin(null)
                 }
-        
+                console.log(data.admin)
                 setUser(data.email)
                 setAdmin(data.admin)
             }
@@ -118,7 +117,8 @@ const AuthProvider = ({children}) => {
             user,
             signup,
             login,
-            logout
+            logout,
+            admin
         }}>
             {children}
         </AuthContext.Provider>

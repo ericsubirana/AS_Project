@@ -1,0 +1,141 @@
+.clasePopUp{
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 40vh;
+}
+
+.classForm{
+    width: min-content;
+    padding: 15px;
+    border: 3px solid #B17457;
+    background: #FAF7F0;
+    border-radius: 5px;
+}
+
+.classForm span {
+    background-color: #B17457;
+  border-radius: 3px 0px 0px 3px;
+  border-right: 3px solid #4A4947;
+  color: #B17457;
+  display: block;
+  float: left;
+  line-height: 50px;
+  text-align: center;
+  width: 50px;
+  height: 50px;
+}
+
+.classForm form input[type="text"] {
+    background-color: #D8D2C2;
+    border-radius: 0px 3px 3px 0px;
+    color: #080808;
+    margin-bottom: 1em;
+    padding: 0 16px;
+    width: 235px;
+    height: 50px;
+}
+
+.classForm form p {
+    margin-block-start: unset;
+    margin-block-end: unset;
+    margin-inline-start: unset;
+    margin-inline-end: unset;
+    unicode-bidi: unset;
+}
+
+.classInput {
+    display: flex;
+}
+
+.selectStudents:hover{
+    cursor: pointer;
+}
+
+.classForm form input[type="submit"] {
+    background: #B17457;
+    border: 0;
+    width: 100%;
+    height: 40px;
+    border-radius: 3px;
+    color: white;
+    cursor: pointer;
+    transition: background 0.3s ease-in-out;
+}
+
+.classForm form input[type="submit"]:hover {
+    background: #4A4947;
+}
+
+.selectStudents{
+    display: flex;
+    flex-direction: row;
+    margin: 0;
+    padding: 0;
+    background-color: #D8D2C2;
+    border-radius: 0px 3px 3px 0px;
+    color: #080808;
+    margin-bottom: 1em;
+    padding: 0 16px;
+    width: 235px;
+    height: 50px;
+    font-size: 16px;
+    display: flex;
+    justify-content: left;
+    align-items: center;
+}
+
+.arrow{
+    display: flex;
+    align-items: center;
+    justify-content: right;
+    margin-bottom: 1em;
+    width: 80%;
+    font-size: 15px;
+    margin-right: 25px;
+    margin-top: 18px;
+}
+
+.studentsList{
+    height: 150px;
+    overflow-y: scroll;
+    border-radius: 5px;
+    margin-bottom: 1em;
+    background-color: #D8D2C2;
+    border: 3px solid #4A4947;
+    padding: 10px;
+}
+
+::-webkit-scrollbar {
+    width: 5px; /* Thin scrollbar width */
+}
+
+::-webkit-scrollbar-track {
+    background: transparent; /* Transparent track */
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: black; /* Black scrollbar handle */
+    border-radius: 10px; /* Rounded corners */
+}
+
+.pStudent{
+    font-size: 16px;
+    padding-left: 10px;
+}
+
+.pStudent:hover{
+    background-color: #9e9888;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.selected {
+    color: green; /* Cambia el color del texto */ 
+}
+
+.noSelected{
+    color: #080808;
+}

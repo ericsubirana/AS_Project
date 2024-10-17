@@ -31,7 +31,7 @@ def verify_token():
 
     try:
         data = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
-
+        m = mongo.db.users.find_one({'email':data.get('email')})
         return jsonify({
             "message": "Token is valid",
             "email": data['email'],

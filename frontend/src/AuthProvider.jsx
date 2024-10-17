@@ -25,6 +25,7 @@ const AuthProvider = ({children}) => {
                     }
                 );
                 const data = await response.json();
+                console.log(data)
 
                 if(!response.data)
                 {
@@ -32,7 +33,7 @@ const AuthProvider = ({children}) => {
                     setAdmin(null)
                 }
         
-                setUser(data.username)
+                setUser(data.email)
                 setAdmin(data.admin)
             }
             catch{
@@ -73,7 +74,7 @@ const AuthProvider = ({children}) => {
 
     const login = async (values) => {
         try {
-            const response = await fetch('http://localhost:5000', {
+            const response = await fetch('http://localhost:5000/login', {
                 method: 'POST', 
                 headers: {
                     'Content-Type': 'application/json', 
@@ -83,31 +84,28 @@ const AuthProvider = ({children}) => {
             });
     
             if (!response.ok) {
-                throw new Error('Error in network request');
+                return 1;
             }
     
             const data = await response.json(); // Parse the JSON response
             setUser(data)
             setAdmin(data.admin)
             console.log('Server response:', data);
+            return 0;
            
         } catch (error) {
             console.error('Error during signup:', error);
             setErrorContext("error.response.data");
+            return 2;
         }
     }
 
     const logout = async () => {
 
-        try {
-            const response = await fetch('http://localhost:5000/logout');
-    
-            if (!response.ok) {
-                throw new Error('Error in network request');
-            }
-            
+        try { 
             setUser(null)
             setAdmin(null)
+            Cookies.remove('token')
            
         } catch (error) {
             console.error('Error during signup:', error);

@@ -38,7 +38,6 @@ def verify_token():
 
     try:
         data = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
-
         return jsonify({
             "message": "Token is valid",
             "username": data['username'],

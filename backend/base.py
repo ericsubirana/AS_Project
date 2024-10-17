@@ -3,6 +3,7 @@ from flask import Flask, request, jsonify, session, make_response
 from flask_pymongo import PyMongo
 from flask_cors import CORS
 import jwt
+import bcrypt
 import datetime
 from dotenv import load_dotenv
 import os
@@ -22,14 +23,6 @@ def hello_world():
     mongo.db.inventory.insert_one({'a':2})
     return 'Hello, Flask World!'
 
-@app.route('/profile')
-def my_profile():
-    response_body = {
-        "name": "Victor",
-        "about" :"TEST"
-    }
-    return response_body
-
 @app.route('/verifyToken', methods=["GET"])
 def verify_token():
     token = request.cookies.get('token') 
@@ -38,11 +31,13 @@ def verify_token():
 
     try:
         data = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+
         return jsonify({
             "message": "Token is valid",
-            "username": data['username'],
-            "admin": data.get('admin')
+            "email": data['email'],
+            "admin": m.get('admin')
         })
+    
     except jwt.ExpiredSignatureError:
         return jsonify({"message": "Token has expired"}), 403
     except jwt.InvalidTokenError:
@@ -62,8 +57,7 @@ def register_user():
 
         token = jwt.encode({
             'user_id': str(user.inserted_id),
-            'username': data.get('username'),
-            'admin': False,
+            'email': data.get('email'),
             'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=24)  # Token expiration
         }, SECRET_KEY, algorithm='HS256')
 
@@ -77,7 +71,6 @@ def register_user():
                 "admin": False
             }
         })
-        
         response.set_cookie('token', token)
 
         return response
@@ -87,11 +80,47 @@ def register_user():
             "status": "error",
             "message": "Email already exists"
         }), 400
-    
-@app.route("/logout")
-def logout():
-    response = make_response("Cookie removed")
-    response.set_cookie('token', '', expires=0)
+
+@app.route('/login', methods=['POST'])
+def login():
+    data = request.get_json()
+    email = data.get('email')
+    password = data.get('password')
+
+    user = mongo.db.users.find_one({'email': email})  
+    if not user:
+        return jsonify({
+            "status": "error",
+            "message": "User not found"
+        }), 404  # Not Found
+
+    # Compare the password (ja que al afegit-li salt canvia tot el rato)
+    if not bcrypt.checkpw(password.encode('utf-8'), user['password'].encode('utf-8')):
+        return jsonify({
+            "status": "error",
+            "message": "Incorrect password"
+        }), 400  # Bad Request
+
+    # Create JWT token
+    token = jwt.encode({
+        'user_id': str(user['_id']),
+        'email': user['email'],
+        'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=24)  # Token expiration
+    }, SECRET_KEY, algorithm='HS256')
+
+    # Prepare response
+    response = jsonify({
+        "status": "success",
+        "message": "Login successful",
+        "user": {
+            "id": str(user['_id']),  # Returning the user's ID as a string
+            "email": email,
+            "username": user['username'],
+            "admin": user['admin']
+        }
+    })
+    response.set_cookie('token', token)
+
     return response
 
 

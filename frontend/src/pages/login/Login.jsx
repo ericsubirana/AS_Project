@@ -11,11 +11,11 @@ import 'react-toastify/dist/ReactToastify.css';
 const Login = () => {
 
     const navigation = useNavigate();
+
     const {login} = useAuth();
 
-    const loginUser = (event) =>
-    {
-        event.preventDefault(); // Evita el refresh de la página
+    const loginUser = async (event) => {
+        event.preventDefault(); 
 
         const email = event.target.user.value;
         const password = event.target.pass.value;
@@ -24,22 +24,26 @@ const Login = () => {
             toast.error("Both fields are required.");
             return;
         }
-
-        const saltRounds = 10; 
-        bcrypt.hash(password, saltRounds).then(x=> {
+  
+        try {
             const values = {
                 email: email,
-                password: x
+                password: password
             };
-    
-            login(values).then(() => {
-                toast.success("Logged successfully!");
-                setTimeout(() => {
-                    navigation("/home");
-                }, 2000); // Optional: adds delay to show the success message
-            })
-        });
-    }
+            console.log(values)
+            login(values).then((x) => {
+                if (x == 0) {
+                    window.location.href = '/home';
+                } else {
+                    toast.error('Email and password does not match');
+                }
+            });
+
+        } catch (err) {
+            toast.error("Something went wrong. Please try again.");
+        }
+    };
+
 
     return(
         <>

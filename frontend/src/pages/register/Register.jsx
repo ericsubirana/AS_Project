@@ -12,7 +12,7 @@ const Register = () => {
     const navigation = useNavigate();
     const {signup} = useAuth();
 
-    const registerUser = (event) =>
+    const registerUser = async (event) =>
     {
         event.preventDefault();
         const form = event.target;
@@ -23,13 +23,13 @@ const Register = () => {
         }
 
         const saltRounds = 10; 
-        bcrypt.hash(event.target.pass.value, saltRounds).then(x=> {
+        await bcrypt.hash(event.target.pass.value, saltRounds).then(x=> {
             const values = {
                 email: form.mail.value,
                 username: form.user.value,
                 password: x
             };
-    
+            console.log(values)
             signup(values).then((x) => {
                 if (x == 0) {
                     window.location.href = '/home';

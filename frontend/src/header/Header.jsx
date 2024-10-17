@@ -1,6 +1,6 @@
 import React from "react";
 import { useAuth } from "../AuthProvider";
-import logo from "../../public/logo.jpeg";
+import logo from "../assets/logo.jpeg";
 
 import "../header/header.css"
 import { useNavigate } from "react-router-dom";

@@ -1,10 +1,33 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useAuth } from "../AuthProvider";
 import { useLocation } from 'react-router-dom';
+import { ToastContainer, toast } from 'react-toastify';
 
 import './clasepopup.css'
+import 'react-toastify/dist/ReactToastify.css';
 
 function ClasePopUp(props) {
+
+    const {user} = useAuth();
+    const [allStudents, setAllStudents] = useState([]) //query to get all students
+    const [displayStudents, setDisplayStudents] = useState(false); 
+    const [students, setStudents] = useState([]) //students that the teacher selected
+
+    const classFormRef = useRef(null); 
+
+    const handleClickOutside = (event) => {
+        if (classFormRef.current && !classFormRef.current.contains(event.target)) {
+            props.setTrigger(false);
+        }
+    };
+
+    useEffect(() => {
+        document.addEventListener("mousedown", handleClickOutside);
+
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
 
     useEffect (() => {
 
@@ -22,21 +45,40 @@ function ClasePopUp(props) {
         takeStudents();
     }, [])
 
-    const addClass = async () => {
-        //fer un from on possi nom de la classe i pugui afegir els alumnes que vulgui
-        //cada classe tindrà user_admin (id del profe), name, powerpoiints {}
-        /*{
-        "user_admin": ObjectId("teacher_id_here"),
-        "name": "Class Name",
-        "powerpoints": [
-            {
-            "filename": "lesson1.pptx",
-            "file_id": ObjectId("file_id_from_gridfs")
-            }
-        ],
-        "students":[id1, id2]
+    const addClass = async (event) => {
+        event.preventDefault()
+
+        if(students.length == 0){
+            toast.error("You need to add at least one student");
+            return 
         }
-        */ 
+
+        const className = event.target.className.value
+        const values = {
+            'emailTeacher': user,
+            'className': className,
+            'students': students
+        }
+        setStudents([])
+        setDisplayStudents(false)
+        fetch('http://localhost:5000/addClass', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json', 
+            },
+            credentials: 'include',
+            body: JSON.stringify(values),
+        }).then(x => {
+            if(x.status == 400){
+                toast.error("There exists a class with that name already");
+                return
+            }
+            else{
+                toast.success("Class created");
+                window.location.reload()
+                props.setTrigger(false)
+            }
+        })
     }
 
     const saveUser = async (item) => {
@@ -49,16 +91,14 @@ function ClasePopUp(props) {
         }
     }
 
-    const [allStudents, setAllStudents] = useState([])
-    const [displayStudents, setDisplayStudents] = useState(false);
-    const [students, setStudents] = useState([])
 
     return (
         <>
+            <ToastContainer position='top-center' />
             <div>
                 {props.trigger && (
                     <div className="clasePopUp"> 
-                        <div className="classForm">
+                        <div className="classForm" ref={classFormRef}>
                             <form onSubmit={addClass}>
                                 <div className="classInput">
                                     <span className="fontawesome-user"></span>

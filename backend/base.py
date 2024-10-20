@@ -1,5 +1,5 @@
 # Import the Flask class from the flask module
-from flask import Flask, request, jsonify, session, make_response
+from flask import Flask, request, jsonify, send_file
 from flask_pymongo import PyMongo
 from flask_cors import CORS
 import jwt
@@ -7,12 +7,16 @@ import bcrypt
 import datetime
 from dotenv import load_dotenv
 import os
+from bson import ObjectId
+import gridfs
+from io import BytesIO
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True, resources={r"/*": {"origins": "http://localhost:5173"}}) #support credentials es per les cookies
 app.config["MONGO_URI"] = "mongodb://localhost:27017/VirtualCampus"
 
 mongo = PyMongo(app)
+fs = gridfs.GridFS(mongo.db)
 
 load_dotenv()
 SECRET_KEY = os.getenv("SECRET_KEY")
@@ -131,7 +135,7 @@ def students():
     if students:  
         response = jsonify({
             "status": "success",
-            "message": "Users retrieved successfully",
+            "message": "Students retrieved successfully",
             "emails": emails 
         })
         return response
@@ -140,6 +144,130 @@ def students():
             "status": "error",
             "message": "No users found"
         }), 400
+    
+@app.route('/addClass', methods=['POST'])
+def addClass():
+    data = request.get_json()
+    print(data)
+    m = mongo.db.classes.find_one({'className':data.get('className')})
+    if m is None:
+        classs = mongo.db.classes.insert_one({
+            'teacherEmail': data.get('emailTeacher'),
+            'className': data.get('className'),
+            'students': data.get('students'),
+        })
+        return jsonify({
+            "status": "success",
+            "message": "Class registered successfully",
+        })
+    else:
+        return jsonify({
+            "status": "error",
+            'message': 'class with that name already exists'
+        }),400
+
+@app.route('/getClasses', methods=['POST'])
+def getClasses():
+    data = request.get_json()
+    if(data.get('admin')):
+        getClasses = mongo.db.classes.find({'teacherEmail': data.get('email')})
+        classes = list(getClasses)
+        for cls in classes:
+            cls['_id'] = str(cls['_id'])
+        return jsonify({
+            "status": "success",
+            "message": "Classes of the teacher had been send successfully",
+            "classes": classes
+        })
+    else:
+        getClasses = mongo.db.classes.find({'students': data.get('email')})
+        classes = list(getClasses)
+        for cls in classes:
+            cls['_id'] = str(cls['_id'])
+        return jsonify({
+            "status": "success",
+            "message": "Classes of the student had been send successfully",
+            "classes": classes
+        })
+    
+@app.route('/uploadLesson', methods=['POST'])
+def addLesson():
+    lesson_name = request.form.get('lessonName') 
+    class_name = request.form.get('className') 
+    
+    if 'file' not in request.files:
+        return jsonify({"error": "No file part"}), 400
+    
+    file = request.files['file']
+
+    if file.filename == '':
+        return jsonify({"error": "No selected file"}), 400
+
+    file_id = fs.put(file, filename=file.filename)
+
+    class_doc = mongo.db.classes.find_one({'className': class_name})
+    
+    if class_doc is None:
+        return jsonify({"error": "Class not found"}), 404
+
+    lesson = {
+        'lesson_name': lesson_name,
+        'file_id': str(file_id), 
+        'filename': file.filename
+    }
+
+    mongo.db.classes.update_one(
+        {'_id': class_doc['_id']},
+        {'$push': {'lessons': lesson}}  
+    )
+
+    return jsonify({
+        "status": "success",
+        "message": "Lesson has been saved successfully",
+        "file_id": str(file_id)
+    })
+
+@app.route('/getLesson/<file_id>', methods=['GET'])
+def get_lesson(file_id):
+
+    file_data = fs.find_one({"_id": ObjectId(file_id)})
+
+    if not file_data:
+        return jsonify({"error": "File not found"}), 404
+
+    file_stream = BytesIO(file_data.read()) 
+
+    return send_file(
+        file_stream,
+        as_attachment=True,
+        download_name=file_data.filename,
+        mimetype='application/pdf'  
+    )
+
+@app.route('/getClass', methods=['POST'])
+def get_class():
+    data = request.get_json()
+    if data.get('className'):
+        cls = mongo.db.classes.find_one({'className': data.get('className')})
+        
+        if cls:
+            cls['_id'] = str(cls['_id'])  
+            return jsonify({
+                "status": "success",
+                "message": "Class of the teacher has been sent successfully",
+                "class": cls
+            })
+        else:
+            return jsonify({
+                "status": "error",
+                "message": "Class not found"
+            }), 404
+    else:
+        return jsonify({
+            "status": "error",
+            "message": "Invalid input"
+        }), 400
+
 # Run the application
 if __name__ == '__main__':
     app.run(debug=True)

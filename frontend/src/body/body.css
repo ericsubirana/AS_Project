@@ -11,3 +11,43 @@
     justify-content: left;
     margin: 20px;
 }
+
+.classObjs{
+    display: flex;
+    flex-wrap: wrap;  
+
+}
+
+.lessonsList{
+    height: 125px;
+    overflow-y: scroll;
+    border-radius: 5px;
+    margin-bottom: 1em;
+}
+
+.classObj{
+    margin: 20px;
+    width: 250px;
+    height: 25vh;
+    background-color: #B17457;
+    border-radius: 5px;
+}
+
+.classObj p {
+    width: 80%;
+    margin-left: 15px;
+    font-size: 16px;
+    color: white;
+}
+
+.classObj hr{
+    border-top: white 1px solid;
+    width: 250px;
+    position: fixed;
+    z-index: 0;
+}
+
+.classObj:hover{
+    cursor:pointer;
+    transform: scale(1.1);
+}

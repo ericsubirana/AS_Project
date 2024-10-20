@@ -3,8 +3,11 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 100%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     height: 40vh;
+    z-index: 2;
 }
 
 .classForm{

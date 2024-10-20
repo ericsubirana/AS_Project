@@ -1,0 +1,46 @@
+.singleClass{
+    margin: 10px;
+    margin-top: 50px;
+}
+
+.singleClass h1{
+    display: flex;
+    justify-content: center;
+}
+
+.lesdocstu{
+    margin-top: 25px;
+    display: flex;
+    flex-direction: row;
+}
+
+.lessons{
+    position: relative;
+    width: 75%;
+    font-size: 16px;
+}
+
+.studentsPart{
+    margin-left: 25px;
+    width: 25%;
+    font-size: 16px;
+}
+
+.studentsListClass{
+    height: 250px;
+    overflow-y: scroll;
+    border-radius: 5px;
+    margin-bottom: 1em;
+}
+
+.addLessonButton{
+    display: flex;
+    justify-content: right;
+    right: 0;
+    position: absolute;
+}
+
+.lessonName:hover{
+    cursor: pointer;
+    font-weight: bold;
+}

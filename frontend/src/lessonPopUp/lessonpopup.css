@@ -1,0 +1,34 @@
+.inputfile {
+    display: none; /* Oculta el input de archivo */
+}
+
+.custom-file-label {
+    background-color: #D8D2C2;
+    border-radius: 0px 3px 3px 0px;
+    color: #080808;
+    margin-bottom: 1em;
+    padding: 0 16px;
+    width: 235px;
+    height: 50px;
+    display: inline-block;
+    text-align: left;
+    line-height: 50px; /* Centra el texto verticalmente */
+    cursor: pointer; /* Cambia el cursor al pasar por encima */
+}
+
+#fileName {
+    margin-left: 10px;
+    line-height: 50px;
+}
+
+.lessonPopUp{
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    height: 40vh;
+    z-index: 2;
+}

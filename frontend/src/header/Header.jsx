@@ -21,7 +21,7 @@ const Header = () => {
                         <h1>LANGUAGES ACADEMY</h1>
                     </div>
                     <div className="lore">
-                            <button className="button-6" onClick={() => logout()}>LOGOUT</button>
+                            <button className="button-6" onClick={() => {logout(), navigation('/home')}}>LOGOUT</button>
                     </div>
                 </div>
             ) : (

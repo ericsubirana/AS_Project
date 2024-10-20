@@ -14,6 +14,7 @@ export const useAuth = () => {
 const AuthProvider = ({children}) => { 
     const [user, setUser] = useState(null);
     const [admin, setAdmin] = useState(null);
+    const [lessonAdded, setLessonAdded] = useState(false);
 
     useEffect( () => {
         const checkLogin = async () => {
@@ -31,7 +32,7 @@ const AuthProvider = ({children}) => {
                     setUser(null)
                     setAdmin(null)
                 }
-                console.log(data.admin)
+                
                 setUser(data.email)
                 setAdmin(data.admin)
             }
@@ -105,7 +106,7 @@ const AuthProvider = ({children}) => {
             setUser(null)
             setAdmin(null)
             Cookies.remove('token')
-           
+            
         } catch (error) {
             console.error('Error during signup:', error);
             setErrorContext("error.response.data");
@@ -118,7 +119,9 @@ const AuthProvider = ({children}) => {
             signup,
             login,
             logout,
-            admin
+            admin,
+            lessonAdded,
+            setLessonAdded
         }}>
             {children}
         </AuthContext.Provider>

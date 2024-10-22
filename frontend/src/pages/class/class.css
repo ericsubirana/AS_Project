@@ -44,3 +44,22 @@
     cursor: pointer;
     font-weight: bold;
 }
+
+.studentList{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.deleteStudent{
+    display: flex;
+    justify-content: end;
+    width: 100%;
+    margin-right: 80px;
+    color: red;
+    font-size: 16px;
+}
+
+.deleteStudent:hover{
+    cursor: pointer;
+}

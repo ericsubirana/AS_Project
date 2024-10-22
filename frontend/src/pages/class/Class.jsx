@@ -12,14 +12,10 @@ function Class() {
     const location = useLocation();
     const { cls } = location.state || {}; //el passem desde el body un cop cliquem la classe
     const [trigger, setTrigger] = useState(false);
-    const { admin, lessonAdded, user } = useAuth();
+    const { admin, lessonAdded, user, setLessonAdded } = useAuth();
     const [classs, setClasss] = useState([])
-    
-    useEffect(() => {
-        setClasss(cls)
-    }, [])
 
-    useEffect(() => {   
+    useEffect(() => {
         const getClass = async () => {
             if (user) { //case anyone is logged
                 const values = { 'className': cls.className }
@@ -37,7 +33,25 @@ function Class() {
         }
         getClass();
 
-    }, [lessonAdded])
+    }, [lessonAdded, trigger])
+
+    const deleteStudent = async (student, className) => {
+        try {
+            const values = { 'className': className, 'student': student }
+            const response = await fetch('http://localhost:5000/deleteStudent', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+                body: JSON.stringify(values)
+            })
+            await response.json()
+            setLessonAdded(!lessonAdded) //canviem el valor perque s'executi el useffect de dalt
+        } catch (error) {
+            
+        }
+    }
 
     const uploadFile = async (value) => {
         try {
@@ -75,7 +89,7 @@ function Class() {
             console.error('Error downloading the file:', err);
         }
     }
-    
+
     return (
         <div>
             <Header />
@@ -95,19 +109,24 @@ function Class() {
                             {classs?.lessons?.map((lesson, index) => (
                                 <p key={index} className="lessonName" onClick={() => { uploadFile(lesson.file_id) }}>
                                     {lesson.lesson_name}
-                                </p>    
+                                </p>
                             ))}
                         </div>
                     </div>
                     {admin && (
                         <div className="studentsPart">
+                            <h4>Students</h4>
+                            <hr />
                             <div className="studentsListClass">
-                                <h4>Students</h4>
-                                <hr />
                                 {classs?.students?.map((student, index) => (
-                                    <p key={index}>
-                                        {student}
-                                    </p>
+                                    <div key={index} className="studentList">
+                                        <p>
+                                            {student}
+                                        </p>
+                                        <div onClick={() => deleteStudent(student, classs?.className)} className="deleteStudent">
+                                            x
+                                        </div>
+                                    </div>
                                 ))}
                             </div>
                         </div>

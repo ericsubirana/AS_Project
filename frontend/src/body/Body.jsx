@@ -7,8 +7,9 @@ import ClasePopUp from "../clasePopUp/ClasePopUp.jsx";
 
 function Body() {
 
-    const { signup, user, admin, lessonAdded } = useAuth();
+    const { signup, user, admin, lessonAdded, setLessonAdded } = useAuth();
     const [trigger, setTrigger] = useState(false);
+    const [deleteClass, setDeleteClass] = useState(false);
     const [classes, setClassses] = useState([]);
 
     const navigate = useNavigate();
@@ -36,6 +37,29 @@ function Body() {
         setTrigger(!trigger)
     }
 
+    const removeClass = async () => {
+        setDeleteClass(!deleteClass)
+    }
+
+    const navToClass = async (cls) => {
+        if(deleteClass){
+            const values = { 'className': cls.className }
+            const response = await fetch('http://localhost:5000/deleteClass', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+                body: JSON.stringify(values)
+            })
+            await response.json()
+            setLessonAdded(!lessonAdded)
+        }
+        else{
+            navigate('/class', { state: { cls } })
+        }   
+    }
+
     return (
         <>
             {user?.length > 0 ? (
@@ -44,13 +68,17 @@ function Body() {
                         <div>
                             <div className="addClassButton">
                                 <button onClick={addClass} className="button-6">ADD CLASS</button>
+                                <button onClick={removeClass} className="button-6" id="removeClass">REMOVE CLASS</button>
+                                {deleteClass && (
+                                    <button onClick={removeClass} className="button-6" id="removeClass">CANCEL</button>
+                                )}
                             </div>
                             <ClasePopUp trigger={trigger} setTrigger={setTrigger} />
                             {classes?.length > 0 && (
                                 <div className="classObjs">
                                     {
                                         classes.map((cls, index) => (
-                                            <div onClick={() => navigate('/class', { state: { cls } })} className="classObj" key={index}>
+                                            <div onClick={() => navToClass(cls)} className={deleteClass ? "classObjDelete" : "classObj"} key={index}>
                                                 <p>{cls.className}</p>
                                                 <hr />
                                                 <div className="lessonsList">

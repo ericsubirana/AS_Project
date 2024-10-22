@@ -268,6 +268,39 @@ def get_class():
             "message": "Invalid input"
         }), 400
 
+@app.route('/deleteStudent', methods=['POST'])
+def delete_student():
+    data = request.get_json()
+
+    result = mongo.db.classes.update_one(
+        {'className': data.get("className"), 'students': data.get("student")},
+        {'$pull': {'students': data.get("student")}}
+    )
+    
+    if result.modified_count > 0:
+        return jsonify({
+            "status": "success",
+            "message": f"Student {data.get('student')} has been removed from the class successfully",
+        })
+    else:
+        return jsonify({
+            "status": "error",
+            "message": "Student not found or already removed",
+        }), 404
+
+@app.route('/deleteClass', methods=['POST'])
+def delete_class():
+    data = request.get_json()
+
+    result = mongo.db.classes.delete_one(
+        {'className': data.get("className")}
+    )
+    
+    return jsonify({
+            "status": "success",
+            "message": f"Student {data.get('student')} has been removed from the class successfully",
+        })
+
 # Run the application
 if __name__ == '__main__':
     app.run(debug=True)

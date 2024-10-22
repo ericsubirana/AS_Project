@@ -15,7 +15,6 @@
 .classObjs{
     display: flex;
     flex-wrap: wrap;  
-
 }
 
 .lessonsList{
@@ -33,7 +32,22 @@
     border-radius: 5px;
 }
 
+.classObjDelete{
+    margin: 20px;
+    width: 250px;
+    height: 25vh;
+    background-color: #f26262;
+    border-radius: 5px;
+}
+
 .classObj p {
+    width: 80%;
+    margin-left: 15px;
+    font-size: 16px;
+    color: white;
+}
+
+.classObjDelete p {
     width: 80%;
     margin-left: 15px;
     font-size: 16px;
@@ -50,4 +64,13 @@
 .classObj:hover{
     cursor:pointer;
     transform: scale(1.1);
+}
+
+.classObjDelete:hover{
+    cursor:pointer;
+    transform: scale(1.1);
+}
+
+#removeClass{
+    margin-left: 20px;
 }

@@ -10,6 +10,7 @@ import os
 from bson import ObjectId
 import gridfs
 from io import BytesIO
+import requests
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True, resources={r"/*": {"origins": "http://localhost:5173"}}) #support credentials es per les cookies
@@ -20,6 +21,7 @@ fs = gridfs.GridFS(mongo.db)
 
 load_dotenv()
 SECRET_KEY = os.getenv("SECRET_KEY")
+API_KEY = os.getenv("API_KEY")
 
 # Define a route and a function to handle requests to that route
 @app.route('/')
@@ -64,7 +66,6 @@ def register_user():
             'email': data.get('email'),
             'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=24)  # Token expiration
         }, SECRET_KEY, algorithm='HS256')
-
         response = jsonify({
             "status": "success",
             "message": "User registered successfully",
@@ -97,7 +98,6 @@ def login():
             "status": "error",
             "message": "User not found"
         }), 404  # Not Found
-
     # Compare the password (ja que al afegit-li salt canvia tot el rato)
     if not bcrypt.checkpw(password.encode('utf-8'), user['password'].encode('utf-8')):
         return jsonify({
@@ -111,7 +111,6 @@ def login():
         'email': user['email'],
         'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=24)  # Token expiration
     }, SECRET_KEY, algorithm='HS256')
-
     # Prepare response
     response = jsonify({
         "status": "success",
@@ -189,7 +188,21 @@ def getClasses():
             "message": "Classes of the student had been send successfully",
             "classes": classes
         })
-    
+
+def checkFile(fileName):
+    url = "https://www.virustotal.com/api/v3/files"
+
+    files = {'file': open(fileName, 'rb')}
+    headers = {
+        "accept": "application/json",
+        "x-apikey": API_KEY,
+    }
+
+    response = requests.post(url, files=files, headers=headers)
+
+    print(response.text)
+    return response.text
+
 @app.route('/uploadLesson', methods=['POST'])
 def addLesson():
     lesson_name = request.form.get('lessonName') 
@@ -203,6 +216,8 @@ def addLesson():
     if file.filename == '':
         return jsonify({"error": "No selected file"}), 400
 
+    virusTotalResponse = checkFile(file)
+    import pdb; pdb.set_trace()
     file_id = fs.put(file, filename=file.filename)
 
     class_doc = mongo.db.classes.find_one({'className': class_name})

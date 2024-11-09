@@ -82,7 +82,7 @@ def register_user():
     else:
         return jsonify({
             "status": "error",
-            "message": "Email already exists"
+            "message": "Email already exists or something went wrong"
         }), 400
 
 @app.route('/login', methods=['POST'])

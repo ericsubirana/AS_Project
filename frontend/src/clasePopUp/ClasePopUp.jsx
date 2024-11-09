@@ -8,7 +8,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
 function ClasePopUp(props) {
 
-    const {user} = useAuth();
+    const {user, admin} = useAuth();
     const [allStudents, setAllStudents] = useState([]) //query to get all students
     const [displayStudents, setDisplayStudents] = useState(false); 
     const [students, setStudents] = useState([]) //students that the teacher selected
@@ -96,7 +96,7 @@ function ClasePopUp(props) {
         <>
             <ToastContainer position='top-center' />
             <div>
-                {props.trigger && (
+                {props.trigger && admin && (
                     <div className="clasePopUp"> 
                         <div className="classForm" ref={classFormRef}>
                             <form onSubmit={addClass}>

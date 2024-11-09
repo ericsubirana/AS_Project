@@ -8,11 +8,15 @@ import 'react-toastify/dist/ReactToastify.css';
 
 function LessonPopUp(props) {
 
-    const { user, lessonAdded, setLessonAdded } = useAuth();
+    const { user, lessonAdded, setLessonAdded, admin } = useAuth();
 
     const addLesson = async (event) => {
         event.preventDefault();
 
+        if(!admin){
+            return
+        }
+        
         const lessonName = event.target.lessonName.value;
         const file = event.target.fileInput.files[0];
 
@@ -29,7 +33,7 @@ function LessonPopUp(props) {
         try {
             const response = await fetch('http://localhost:5000/uploadLesson', {
                 method: 'POST',
-                body: formData, 
+                body: formData,
                 credentials: 'include'
             });
 
@@ -37,7 +41,7 @@ function LessonPopUp(props) {
                 const result = await response.json();
                 toast.success('Lesson added successfully!');
                 await setLessonAdded(!lessonAdded)
-                props.setTrigger(false); 
+                props.setTrigger(false);
             } else {
                 toast.error('Error uploading lesson');
             }
@@ -68,30 +72,32 @@ function LessonPopUp(props) {
     return (
         <>
             <ToastContainer position='top-center' />
-            <div>
-                {props.trigger && (
-                    <div className="lessonPopUp">
-                        <div className="classForm" ref={classFormRef}>
-                            <form onSubmit={addLesson}>
-                                <div className="classInput">
-                                    <span className="fontawesome-user"></span>
-                                    <input type="text" id="lessonName" name="lessonName" placeholder="Lesson Name" required />
-                                </div>
-                                <div className="classInput">
-                                    <div className="file-upload">
+            {admin && (
+                <div>
+                    {props.trigger && (
+                        <div className="lessonPopUp">
+                            <div className="classForm" ref={classFormRef}>
+                                <form onSubmit={addLesson}>
+                                    <div className="classInput">
                                         <span className="fontawesome-user"></span>
-                                        <label htmlFor="fileInput" className="custom-file-label">Seleccionar archivo</label>
-                                        <input type="file" id="fileInput" className="inputfile" accept="application/pdf" />
+                                        <input type="text" id="lessonName" name="lessonName" placeholder="Lesson Name" required />
                                     </div>
-                                </div>
-                                <div className="classInput">
-                                    <input type="submit" value="ADD LESSON" />
-                                </div>
-                            </form>
+                                    <div className="classInput">
+                                        <div className="file-upload">
+                                            <span className="fontawesome-user"></span>
+                                            <label htmlFor="fileInput" className="custom-file-label">Seleccionar archivo</label>
+                                            <input type="file" id="fileInput" className="inputfile" accept="application/pdf" />
+                                        </div>
+                                    </div>
+                                    <div className="classInput">
+                                        <input type="submit" value="ADD LESSON" />
+                                    </div>
+                                </form>
+                            </div>
                         </div>
-                    </div>
-                )}
-            </div>
+                    )}
+                </div>
+            )}
         </>
 
     )

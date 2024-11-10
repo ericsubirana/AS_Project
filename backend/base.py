@@ -24,7 +24,6 @@ fs = gridfs.GridFS(mongo.db)
 load_dotenv()
 SECRET_KEY = os.getenv("SECRET_KEY")
 SECRET_ENCRYPTION_KEY = os.getenv("SECRET_ENCRYPTION_KEY")
-# Generar una clave de cifrado de tamaño 16, 24, o 32 bytes
 key = hashlib.sha256(SECRET_ENCRYPTION_KEY.encode()).digest()[:16]
 
 def encrypt_ecb(text):

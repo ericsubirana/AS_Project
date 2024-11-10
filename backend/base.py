@@ -192,16 +192,38 @@ def getClasses():
 def checkFile(fileName):
     url = "https://www.virustotal.com/api/v3/files"
 
-    files = {'file': open(fileName, 'rb')}
+    files = {'file': fileName}
     headers = {
         "accept": "application/json",
         "x-apikey": API_KEY,
     }
-
     response = requests.post(url, files=files, headers=headers)
+    if response.status_code == 200:
+        data = response.json()
+        print(data)
+        id = data.get('data', False).get('id', False)
+        if id:
+            return id, 200
+    return 0, 400
 
-    print(response.text)
-    return response.text
+def getFileReport(id):
+    headers = {
+        "accept": "application/json",
+        "x-apikey": API_KEY,
+    }
+    url = "https://www.virustotal.com/api/v3/analyses" + '/' + str(id)
+    response = requests.get(url, headers=headers)
+    
+    if response.status_code == 200:
+        data = response.json()
+        stats = data.get('data', False).get('attributes', False).get('stats', False)
+        print(stats)
+        if stats:
+            keys_to_check = ['malicious', 'suspicious', 'timeout', 'confirmed-timeout', 'failure']
+            no_error = all(stats.get(key, False) == 0 for key in keys_to_check)
+            if no_error:
+                return 200
+    return 400
 
 @app.route('/uploadLesson', methods=['POST'])
 def addLesson():
@@ -216,8 +238,14 @@ def addLesson():
     if file.filename == '':
         return jsonify({"error": "No selected file"}), 400
 
-    virusTotalResponse = checkFile(file)
-    import pdb; pdb.set_trace()
+    virustotalId, status_code = checkFile(file)
+    if status_code == 200:
+        report = getFileReport(virustotalId)
+        if report == 400:
+            return jsonify({"error": "Have been an error uploading the file. Try it again or contact your administrator."}), 400
+    else:
+        return jsonify({"error": "Have been an error uploading the file. Try it again or contact your administrator."}), 400
+    
     file_id = fs.put(file, filename=file.filename)
 
     class_doc = mongo.db.classes.find_one({'className': class_name})

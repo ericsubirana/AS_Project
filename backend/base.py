@@ -301,6 +301,50 @@ def delete_class():
             "message": f"Student {data.get('student')} has been removed from the class successfully",
         })
 
+@app.route('/deleteLesson', methods=['POST'])
+def delete_lesson():
+    try:
+        data = request.get_json()
+        class_name = data.get('className')
+        file_id_str = data.get('file')['file_id']
+        
+        print(f"Class Name: {class_name}")
+        print(f"File ID to delete: {file_id_str}")
+
+        # Convert file_id to ObjectId
+        file_id = ObjectId(file_id_str)
+
+        # Step 1: Remove the lesson from the `lessons` array in the `classes` collection
+        result = mongo.db.classes.update_one(
+            { "className": class_name },
+            { "$pull": { "lessons": { "file_id": file_id_str } } }
+        )
+
+        # Debugging output for update
+        if result.modified_count > 0:
+            print("Lesson removed from class.")
+
+        # Step 2: Delete the file from GridFS (both metadata and data chunks)
+        file_delete_result = mongo.db.fs.files.delete_one({ "_id": file_id })
+        chunks_delete_result = mongo.db.fs.chunks.delete_many({ "files_id": file_id })
+
+        # Debugging output for file deletion
+        print(f"Deleted file: {file_delete_result.deleted_count}")
+        print(f"Deleted chunks: {chunks_delete_result.deleted_count}")
+
+        return jsonify({
+            "status": "success",
+            "message": f"Lesson with file ID {file_id_str} has been removed successfully",
+        }), 200
+
+    except Exception as e:
+        print(f"Error: {e}")
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
+    
+    
 # Run the application
 if __name__ == '__main__':
     app.run(debug=True)

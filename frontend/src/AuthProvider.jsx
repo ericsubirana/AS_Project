@@ -32,7 +32,7 @@ const AuthProvider = ({children}) => {
                     setUser(null)
                     setAdmin(null)
                 }
-                
+
                 setUser(data.email)
                 setAdmin(data.admin)
             }

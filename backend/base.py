@@ -34,10 +34,14 @@ def encrypt_ecb(text):
     return encrypted_message_string
 
 def decrypt_ecb(text):
+    # Ensure text is decoded from base64 and converted to bytes
+    encrypted_message = base64.b64decode(text)
+    
     cipher = AES.new(key, AES.MODE_ECB)
-    decrypted_padded_message = cipher.decrypt(text)
-    plaintext = unpad(decrypted_padded_message, AES.block_size).decode()
+    decrypted_padded_message = cipher.decrypt(encrypted_message)
+    plaintext = unpad(decrypted_padded_message, AES.block_size).decode('utf-8')
     return plaintext
+
 
 # Define a route and a function to handle requests to that route
 @app.route('/')
@@ -151,6 +155,7 @@ def students():
     students_cursor = mongo.db.users.find({'admin': False})
     students = list(students_cursor) 
     emails = [decrypt_ecb(student.get('email')) for student in students] 
+    print(emails)
     if students:  
         response = jsonify({
             "status": "success",
@@ -167,13 +172,14 @@ def students():
 @app.route('/addClass', methods=['POST'])
 def addClass():
     data = request.get_json()
-    print(data)
+    students = list(data.get('students')) 
+    students = [encrypt_ecb(student) for student in students] 
     m = mongo.db.classes.find_one({'className':data.get('className')})
     if m is None:
         classs = mongo.db.classes.insert_one({
             'teacherEmail': data.get('emailTeacher'),
             'className': data.get('className'),
-            'students': data.get('students'),
+            'students': students,
         })
         return jsonify({
             "status": "success",
@@ -268,7 +274,9 @@ def get_class():
     data = request.get_json()
     if data.get('className'):
         cls = mongo.db.classes.find_one({'className': data.get('className')})
-        
+        students = list(cls.get('students')) 
+        students = [decrypt_ecb(student) for student in students] 
+        cls['students'] = students
         if cls:
             cls['_id'] = str(cls['_id'])  
             return jsonify({
@@ -290,10 +298,10 @@ def get_class():
 @app.route('/deleteStudent', methods=['POST'])
 def delete_student():
     data = request.get_json()
-
+    student = encrypt_ecb(data.get("student"));
     result = mongo.db.classes.update_one(
-        {'className': data.get("className"), 'students': data.get("student")},
-        {'$pull': {'students': data.get("student")}}
+        {'className': data.get("className"), 'students': student},
+        {'$pull': {'students': student}}
     )
     
     if result.modified_count > 0:

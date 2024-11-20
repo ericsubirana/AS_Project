@@ -10,7 +10,10 @@ import os
 from bson import ObjectId
 import gridfs
 from io import BytesIO
-
+from Crypto.Cipher import AES
+import hashlib
+from Crypto.Util.Padding import pad, unpad
+import base64
 app = Flask(__name__)
 CORS(app, supports_credentials=True, resources={r"/*": {"origins": "http://localhost:5173"}}) #support credentials es per les cookies
 app.config["MONGO_URI"] = "mongodb://localhost:27017/VirtualCampus"
@@ -20,6 +23,21 @@ fs = gridfs.GridFS(mongo.db)
 
 load_dotenv()
 SECRET_KEY = os.getenv("SECRET_KEY")
+SECRET_ENCRYPTION_KEY = os.getenv("SECRET_ENCRYPTION_KEY")
+key = hashlib.sha256(SECRET_ENCRYPTION_KEY.encode()).digest()[:16]
+
+def encrypt_ecb(text):
+    cipher = AES.new(key, AES.MODE_ECB)
+    padded_message = pad(text.encode(), AES.block_size)
+    encrypted_message = cipher.encrypt(padded_message)
+    encrypted_message_string = base64.b64encode(encrypted_message).decode('utf-8')
+    return encrypted_message_string
+
+def decrypt_ecb(text):
+    cipher = AES.new(key, AES.MODE_ECB)
+    decrypted_padded_message = cipher.decrypt(text)
+    plaintext = unpad(decrypted_padded_message, AES.block_size).decode()
+    return plaintext
 
 # Define a route and a function to handle requests to that route
 @app.route('/')
@@ -35,10 +53,11 @@ def verify_token():
 
     try:
         data = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
-        m = mongo.db.users.find_one({'email':data.get('email')})
+        m = mongo.db.users.find_one({'email': data.get('email')})
+        print(m)
         return jsonify({
             "message": "Token is valid",
-            "email": data['email'],
+            "email": data.get('email'),
             "admin": m.get('admin')
         })
     
@@ -50,18 +69,18 @@ def verify_token():
 @app.route('/signup', methods=["POST"])
 def register_user():
     data = request.get_json()
-    m = mongo.db.users.find_one({'email':data.get('email')})
+    m = mongo.db.users.find_one({'email':encrypt_ecb(data.get('email'))})
     if m is None:
         user = mongo.db.users.insert_one({
-            'email': data.get('email'),
-            'username': data.get('username'),
+            'email': encrypt_ecb(data.get('email')),
+            'username': (data.get('username')),
             'password': data.get('password'),
             'admin': False
         })
 
         token = jwt.encode({
             'user_id': str(user.inserted_id),
-            'email': data.get('email'),
+            'email': encrypt_ecb(data.get('email')),
             'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=24)  # Token expiration
         }, SECRET_KEY, algorithm='HS256')
 
@@ -91,7 +110,7 @@ def login():
     email = data.get('email')
     password = data.get('password')
 
-    user = mongo.db.users.find_one({'email': email})  
+    user = mongo.db.users.find_one({'email': encrypt_ecb(email)})  
     if not user:
         return jsonify({
             "status": "error",
@@ -108,7 +127,7 @@ def login():
     # Create JWT token
     token = jwt.encode({
         'user_id': str(user['_id']),
-        'email': user['email'],
+        'email':  encrypt_ecb(email),
         'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=24)  # Token expiration
     }, SECRET_KEY, algorithm='HS256')
 
@@ -131,7 +150,7 @@ def login():
 def students():
     students_cursor = mongo.db.users.find({'admin': False})
     students = list(students_cursor) 
-    emails = [student.get('email') for student in students] 
+    emails = [decrypt_ecb(student.get('email')) for student in students] 
     if students:  
         response = jsonify({
             "status": "success",

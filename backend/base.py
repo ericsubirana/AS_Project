@@ -329,7 +329,7 @@ def delete_class():
     result = mongo.db.classes.delete_one(
         {'className': data.get("className")}
     )
-    logger.debug('%s Student have been deleted.', data.get("className"))
+    logger.debug('%s Class has been deleted.', data.get("className"))
     return jsonify({
             "status": "success",
             "message": f"Student {data.get('student')} has been removed from the class successfully",

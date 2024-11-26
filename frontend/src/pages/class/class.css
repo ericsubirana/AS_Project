@@ -63,3 +63,16 @@
 .deleteStudent:hover{
     cursor: pointer;
 }
+
+.deleteLesson{
+    display: flex;
+    justify-content: end;
+    width: 30%;
+    margin-right: 80px;
+    color: red;
+    font-size: 16px;
+}
+
+.deleteLesson:hover{
+    cursor: pointer;
+}

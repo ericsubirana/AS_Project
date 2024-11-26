@@ -19,9 +19,15 @@ const Login = () => {
 
         const email = event.target.user.value;
         const password = event.target.pass.value;
-
+        const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        
         if (!email || !password) {
             toast.error("Both fields are required.");
+            return;
+        }
+
+        if (!emailPattern.test(email)) {
+            toast.error("Please enter a valid email address.");
             return;
         }
   
@@ -52,7 +58,7 @@ const Login = () => {
                 <ToastContainer position='top-center' />
                 <form name='form-login' onSubmit={loginUser}>
                     <span className="fontawesome-user"></span>
-                    <input type="text" id="user" name="user" placeholder="Email" required/>
+                    <input type="text" id="user" name="user" placeholder="Email" pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}" required/>
                     <span className="fontawesome-lock"></span>
                     <input type="password" id="pass" name="pass" placeholder="Password" required/>
                     <input type="submit" value="Login"/>

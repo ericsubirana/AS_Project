@@ -50,7 +50,7 @@ const AuthProvider = ({children}) => {
     }, [])
 
     const signup = async (values) => {
-
+        console.log('epa')
         try {
             const response = await fetch('http://localhost:5000/signup', {
                 method: 'POST', 
@@ -64,9 +64,9 @@ const AuthProvider = ({children}) => {
             if (!response.ok) {
                 return 1;
             }
-            
-            Cookies.set("token", data.token);
+
             const data = await response.json(); // Parse the JSON response
+            Cookies.set("token", data.token);
             setUser(data)
             setAdmin(data.admin)
             return 0;

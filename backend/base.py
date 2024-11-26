@@ -366,7 +366,7 @@ def delete_lesson():
         print(f"Deleted file: {file_delete_result.deleted_count}")
         print(f"Deleted chunks: {chunks_delete_result.deleted_count}")
 
-        logger.warning('Lesson with file ID %s has been removed successfully', file_id_str)
+        logger.debug('Lesson with file ID %s has been removed successfully', file_id_str)
         return jsonify({
             "status": "success",
             "message": f"Lesson with file ID {file_id_str} has been removed successfully",

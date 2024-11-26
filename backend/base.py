@@ -49,9 +49,9 @@ def hello_world():
     mongo.db.inventory.insert_one({'a':2})
     return 'Hello, Flask World!'
 
-@app.route('/verifyToken', methods=["GET"])
+@app.route('/verifyToken', methods=["POST"])
 def verify_token():
-    token = request.cookies.get('token') 
+    token = request.get_json()
     if not token:
         return jsonify({"message": "Token is missing"}), 403
 
@@ -96,9 +96,9 @@ def register_user():
                 "email": data.get('email'),
                 "username": data.get('username'),
                 "admin": False
-            }
+            },
+            "token": token
         })
-        response.set_cookie('token', token)
 
         return response
 
@@ -144,7 +144,8 @@ def login():
             "email": email,
             "username": user['username'],
             "admin": user['admin']
-        }
+        },
+        "token":token
     })
     response.set_cookie('token', token)
 

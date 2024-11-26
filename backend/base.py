@@ -14,6 +14,7 @@ from Crypto.Cipher import AES
 import hashlib
 from Crypto.Util.Padding import pad, unpad
 import base64
+import logging
 app = Flask(__name__)
 CORS(app, supports_credentials=True, resources={r"/*": {"origins": "http://localhost:5173"}}) #support credentials es per les cookies
 app.config["MONGO_URI"] = "mongodb://localhost:27017/VirtualCampus"
@@ -24,7 +25,10 @@ fs = gridfs.GridFS(mongo.db)
 load_dotenv()
 SECRET_KEY = os.getenv("SECRET_KEY")
 SECRET_ENCRYPTION_KEY = os.getenv("SECRET_ENCRYPTION_KEY")
+print(SECRET_ENCRYPTION_KEY)
 key = hashlib.sha256(SECRET_ENCRYPTION_KEY.encode()).digest()[:16]
+logger = logging.getLogger(__name__)
+logging.basicConfig(filename='logging.log', format='%(levelname)s:%(message)   s%(asctime)s', encoding='utf-8', filemode='w', level=logging.DEBUG)
 
 def encrypt_ecb(text):
     cipher = AES.new(key, AES.MODE_ECB)
@@ -81,7 +85,7 @@ def register_user():
             'password': data.get('password'),
             'admin': False
         })
-
+        logger.debug('%s User has been created.', data.get('email'))
         token = jwt.encode({
             'user_id': str(user.inserted_id),
             'email': encrypt_ecb(data.get('email')),
@@ -135,6 +139,7 @@ def login():
         'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=24)  # Token expiration
     }, SECRET_KEY, algorithm='HS256')
 
+    logger.debug('%s Login Successful.', data.get('email'))
     # Prepare response
     response = jsonify({
         "status": "success",
@@ -181,6 +186,7 @@ def addClass():
             'className': data.get('className'),
             'students': students,
         })
+        logger.debug('%s Class has been created.', data.get('className'))
         return jsonify({
             "status": "success",
             "message": "Class registered successfully",
@@ -305,6 +311,7 @@ def delete_student():
     )
     
     if result.modified_count > 0:
+        logger.debug('%s Student has been deleted.', data.get('student'))
         return jsonify({
             "status": "success",
             "message": f"Student {data.get('student')} has been removed from the class successfully",
@@ -322,7 +329,7 @@ def delete_class():
     result = mongo.db.classes.delete_one(
         {'className': data.get("className")}
     )
-    
+    logger.debug('%s Student have been deleted.', data.get("className"))
     return jsonify({
             "status": "success",
             "message": f"Student {data.get('student')} has been removed from the class successfully",
@@ -359,6 +366,7 @@ def delete_lesson():
         print(f"Deleted file: {file_delete_result.deleted_count}")
         print(f"Deleted chunks: {chunks_delete_result.deleted_count}")
 
+        logger.warning('Lesson with file ID %s has been removed successfully', file_id_str)
         return jsonify({
             "status": "success",
             "message": f"Lesson with file ID {file_id_str} has been removed successfully",

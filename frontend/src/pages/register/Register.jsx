@@ -16,9 +16,15 @@ const Register = () => {
     {
         event.preventDefault();
         const form = event.target;
+        const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
         if (!form.mail.value || !form.user.value || !form.pass.value) {
             toast.error("All fields are required.");
+            return;
+        }
+
+        if (!emailPattern.test(form.mail.value)) {
+            toast.error("Please enter a valid email address.");
             return;
         }
 
@@ -47,7 +53,7 @@ const Register = () => {
                 <ToastContainer position='top-center' />
                 <form name='form-login' onSubmit={registerUser}>
                     <span className="fontawesome-lock"></span>
-                    <input type="text" id="mail" name="mail" placeholder="Email" required/>
+                    <input type="text" id="mail" name="mail" placeholder="Email" pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}" required/>
                     <span className="fontawesome-user"></span>
                     <input type="text" id="user" name="user" placeholder="Username" required/>
                     <span className="fontawesome-lock"></span>

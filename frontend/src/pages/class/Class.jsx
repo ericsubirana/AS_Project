@@ -33,7 +33,7 @@ function Class() {
         }
         getClass();
 
-    }, [lessonAdded, trigger])
+    }, [lessonAdded, trigger, user])
 
     const deleteStudent = async (student, className) => {
         try {
@@ -49,7 +49,7 @@ function Class() {
             await response.json()
             setLessonAdded(!lessonAdded) //canviem el valor perque s'executi el useffect de dalt
         } catch (error) {
-            
+            console.log(error)
         }
     }
 
@@ -90,6 +90,24 @@ function Class() {
         }
     }
 
+    const removeLesson = async (className, file) => {
+        try {
+            const values = { 'className': className, 'file': file }
+            const response = await fetch('http://localhost:5000/deleteLesson', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+                body: JSON.stringify(values)
+            })
+            await response.json()
+            setLessonAdded(!lessonAdded) 
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
     return (
         <div>
             <Header />
@@ -107,9 +125,14 @@ function Class() {
                         )}
                         <div className="studentsListClass">
                             {classs?.lessons?.map((lesson, index) => (
-                                <p key={index} className="lessonName" onClick={() => { uploadFile(lesson.file_id) }}>
-                                    {lesson.lesson_name}
-                                </p>
+                                <div key={index} className="studentList">
+                                    <p className="lessonName" onClick={() => { uploadFile(lesson.file_id) }}>
+                                        {lesson.lesson_name}
+                                    </p>
+                                    {admin && (
+                                        <div className="deleteLesson" onClick={() => removeLesson(classs?.className, lesson)}> x </div>
+                                    )}
+                                </div>
                             ))}
                         </div>
                     </div>

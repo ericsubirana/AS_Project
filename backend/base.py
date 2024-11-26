@@ -25,7 +25,7 @@ fs = gridfs.GridFS(mongo.db)
 load_dotenv()
 SECRET_KEY = os.getenv("SECRET_KEY")
 SECRET_ENCRYPTION_KEY = os.getenv("SECRET_ENCRYPTION_KEY")
-print(SECRET_ENCRYPTION_KEY)
+
 key = hashlib.sha256(SECRET_ENCRYPTION_KEY.encode()).digest()[:16]
 logger = logging.getLogger(__name__)
 logging.basicConfig(filename='logging.log', format='%(levelname)s:%(message)   s%(asctime)s', encoding='utf-8', filemode='w', level=logging.DEBUG)

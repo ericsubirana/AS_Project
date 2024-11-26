@@ -16,7 +16,7 @@ from Crypto.Util.Padding import pad, unpad
 import base64
 import logging
 app = Flask(__name__)
-CORS(app, supports_credentials=True, resources={r"/*": {"origins": "http://localhost:5173"}}) #support credentials es per les cookies
+CORS(app, supports_credentials=True, resources={r"/*": {"origins": "https://localhost:5173"}}) #support credentials es per les cookies
 app.config["MONGO_URI"] = "mongodb://localhost:27017/VirtualCampus"
 
 mongo = PyMongo(app)

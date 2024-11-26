@@ -12,36 +12,49 @@ function LessonPopUp(props) {
 
     const addLesson = async (event) => {
         event.preventDefault();
-
         if(!admin){
             return
         }
         
         const lessonName = event.target.lessonName.value;
         const file = event.target.fileInput.files[0];
-
+    
         if (!file) {
             toast.error('Please select a file!');
             return;
         }
-
+    
+        // Verificar que el archivo sea un PDF
+        if (file.type !== 'application/pdf') {
+            toast.error('Only PDF files are allowed!');
+            return;
+        }
+    
+        // Opcional: Verificar tamaño de archivo, ej. 5MB máximo
+        const maxSize = 5 * 1024 * 1024; // 5 MB en bytes
+        if (file.size > maxSize) {
+            toast.error('File size exceeds 5MB limit!');
+            return;
+        }
+    
         const formData = new FormData();
         formData.append('lessonName', lessonName);
         formData.append('file', file);
         formData.append('className', props.className);
-
+    
         try {
             const response = await fetch('http://localhost:5000/uploadLesson', {
                 method: 'POST',
                 body: formData,
                 credentials: 'include'
             });
-
+    
             if (response.ok) {
                 const result = await response.json();
                 toast.success('Lesson added successfully!');
-                await setLessonAdded(!lessonAdded)
-                props.setTrigger(false);
+                await setLessonAdded(!lessonAdded);
+                props.setTrigger(false); 
+
             } else {
                 toast.error('Error uploading lesson');
             }
@@ -49,9 +62,9 @@ function LessonPopUp(props) {
             console.error('Error uploading lesson:', error);
             toast.error('An error occurred during upload');
         }
-
+    
         props.setTrigger(false);
-    }
+    };
 
     const classFormRef = useRef(null);
 

@@ -21,8 +21,12 @@ const AuthProvider = ({children}) => {
             try{
                 const response = await fetch('http://localhost:5000/verifyToken',
                     {
-                        method: 'GET',
-                        credentials: 'include'
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json', 
+                        },
+                        credentials: 'include',
+                        body: JSON.stringify(Cookies.get('token')),
                     }
                 );
                 const data = await response.json();
@@ -46,7 +50,7 @@ const AuthProvider = ({children}) => {
     }, [])
 
     const signup = async (values) => {
-
+        console.log('epa')
         try {
             const response = await fetch('http://localhost:5000/signup', {
                 method: 'POST', 
@@ -60,9 +64,9 @@ const AuthProvider = ({children}) => {
             if (!response.ok) {
                 return 1;
             }
-            
+
             const data = await response.json(); // Parse the JSON response
-            console.log(data)
+            Cookies.set("token", data.token);
             setUser(data)
             setAdmin(data.admin)
             return 0;
@@ -90,6 +94,7 @@ const AuthProvider = ({children}) => {
             const data = await response.json(); // Parse the JSON response
             setUser(data)
             setAdmin(data.admin)
+            Cookies.set("token", data.token);
             console.log('Server response:', data);
             return 0;
            

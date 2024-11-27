@@ -10,11 +10,14 @@ import os
 from bson import ObjectId
 import gridfs
 from io import BytesIO
+
+import requests
 from Crypto.Cipher import AES
 import hashlib
 from Crypto.Util.Padding import pad, unpad
 import base64
 import logging
+
 app = Flask(__name__)
 CORS(app, supports_credentials=True, resources={r"/*": {"origins": "https://localhost:5173"}}) #support credentials es per les cookies
 app.config["MONGO_URI"] = "mongodb://localhost:27017/VirtualCampus"
@@ -24,6 +27,8 @@ fs = gridfs.GridFS(mongo.db)
 
 load_dotenv()
 SECRET_KEY = os.getenv("SECRET_KEY")
+
+API_KEY = os.getenv("API_KEY")
 SECRET_ENCRYPTION_KEY = os.getenv("SECRET_ENCRYPTION_KEY")
 
 key = hashlib.sha256(SECRET_ENCRYPTION_KEY.encode()).digest()[:16]
@@ -45,7 +50,6 @@ def decrypt_ecb(text):
     decrypted_padded_message = cipher.decrypt(encrypted_message)
     plaintext = unpad(decrypted_padded_message, AES.block_size).decode('utf-8')
     return plaintext
-
 
 # Define a route and a function to handle requests to that route
 @app.route('/')
@@ -91,7 +95,6 @@ def register_user():
             'email': encrypt_ecb(data.get('email')),
             'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=24)  # Token expiration
         }, SECRET_KEY, algorithm='HS256')
-
         response = jsonify({
             "status": "success",
             "message": "User registered successfully",
@@ -124,7 +127,6 @@ def login():
             "status": "error",
             "message": "User not found"
         }), 404  # Not Found
-
     # Compare the password (ja que al afegit-li salt canvia tot el rato)
     if not bcrypt.checkpw(password.encode('utf-8'), user['password'].encode('utf-8')):
         return jsonify({
@@ -221,7 +223,43 @@ def getClasses():
             "message": "Classes of the student had been send successfully",
             "classes": classes
         })
+
+def checkFile(fileName):
+    url = "https://www.virustotal.com/api/v3/files"
+
+    files = {'file': fileName}
+    headers = {
+        "accept": "application/json",
+        "x-apikey": API_KEY,
+    }
+    response = requests.post(url, files=files, headers=headers)
+    if response.status_code == 200:
+        data = response.json()
+        print(data)
+        id = data.get('data', False).get('id', False)
+        if id:
+            return id, 200
+    return 0, 400
+
+def getFileReport(id):
+    headers = {
+        "accept": "application/json",
+        "x-apikey": API_KEY,
+    }
+    url = "https://www.virustotal.com/api/v3/analyses" + '/' + str(id)
+    response = requests.get(url, headers=headers)
     
+    if response.status_code == 200:
+        data = response.json()
+        stats = data.get('data', False).get('attributes', False).get('stats', False)
+        print(stats)
+        if stats:
+            keys_to_check = ['malicious', 'suspicious', 'timeout', 'confirmed-timeout', 'failure']
+            no_error = all(stats.get(key, False) == 0 for key in keys_to_check)
+            if no_error:
+                return 200
+    return 400
+
 @app.route('/uploadLesson', methods=['POST'])
 def addLesson():
     lesson_name = request.form.get('lessonName') 
@@ -235,6 +273,14 @@ def addLesson():
     if file.filename == '':
         return jsonify({"error": "No selected file"}), 400
 
+    virustotalId, status_code = checkFile(file)
+    if status_code == 200:
+        report = getFileReport(virustotalId)
+        if report == 400:
+            return jsonify({"error": "Have been an error uploading the file. Try it again or contact your administrator."}), 400
+    else:
+        return jsonify({"error": "Have been an error uploading the file. Try it again or contact your administrator."}), 400
+    
     file_id = fs.put(file, filename=file.filename)
 
     class_doc = mongo.db.classes.find_one({'className': class_name})

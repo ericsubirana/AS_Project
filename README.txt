@@ -1,6 +1,6 @@
-# Virtual Campus System
+# Languages School
 
-Virtual Campus System es una plataforma web diseñada para simular un campus virtual que facilita la comunicación y gestión académica en línea. El sistema proporciona un entorno donde estudiantes, profesores y administradores pueden interactuar, gestionar recursos educativos y participar en actividades académicas de manera eficiente.
+Languages School es una plataforma web diseñada para simular un campus virtual que facilita la comunicación y gestión académica en línea. El sistema proporciona un entorno donde estudiantes, profesores y administradores pueden interactuar, gestionar recursos educativos y participar en actividades académicas de manera eficiente.
 
 | Estudiantes  | Correo                                             |
 |--------------|----------------------------------------------------|
